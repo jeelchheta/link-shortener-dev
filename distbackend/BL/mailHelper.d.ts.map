@@ -1,0 +1,1 @@
+{"version":3,"file":"mailHelper.d.ts","sourceRoot":"","sources":["../../backend/BL/mailHelper.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,aAAa,MAAM,wCAAwC,CAAC;AAExE,wBAAsB,SAAS,CAC3B,EAAE,EAAE,MAAM,EACV,OAAO,EAAE,MAAM,GAAG,SAAS,EAC3B,IAAI,EAAE,MAAM,GAAG,SAAS,GAAG,OAAO,CAAC,aAAa,CAAC,eAAe,GAAG,SAAS,CAAC,CAuBhF"}
