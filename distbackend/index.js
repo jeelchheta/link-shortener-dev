@@ -15,6 +15,7 @@ const buildPath = path.join(__dirname, "../frontend/build");
 app.use(express.urlencoded({
     extended: false,
 }));
+app.set("trust proxy", 1);
 // Middleware to parse JSON payloads
 app.use(express.json());
 // route
