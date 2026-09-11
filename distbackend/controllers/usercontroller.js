@@ -115,7 +115,7 @@ export async function setnewpassword(req, res, next) {
         else if (Moment(new Date()).diff(user.resetPasswordExpires, "minutes") > TOKEN_EXPIRATION_MIN) {
             return res.status(400).json(BaseResponse(400, Message[400], null));
         }
-        await updatepasswordBL(req.body);
+        await updatepasswordBL({ token: token?.toString(), password: password });
         return res.status(200).json(BaseResponse(200, Message[200], null));
     }
     catch (err) {

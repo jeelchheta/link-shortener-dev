@@ -1,5 +1,5 @@
 import { createLinkBL, deleteLinkBL, getLinkAnalyticsBL, getMyLinksBL, getStatsBL } from "../BL/linkBL.js";
-import { braintree_Plan_linkLimit, braintree_Plans } from "../config/braintree.js";
+import { braintree_Plan_linkLimit, braintree_Plans, PlanType } from "../config/braintree.js";
 import { Message } from "../constant/constant.js";
 import LinkModel, {} from "../models/Link.js";
 import SubscriptionModel from "../models/Subscription.js";
@@ -9,7 +9,7 @@ import { BaseResponse, generateCode, isValidCustomCode, isValidHttpUrlRegex } fr
 // @route   POST /api/links
 export async function createLink(req, res, next) {
     try {
-        const { originalUrl, customCode, tags, expiresAt } = req.body;
+        const { originalUrl } = req.body;
         if (!originalUrl || !isValidHttpUrlRegex(originalUrl)) {
             return res.status(400).json(BaseResponse(400, Message.Valid_URL_400, null));
         }
@@ -26,8 +26,18 @@ export async function createLink(req, res, next) {
                 return res.status(403).json(BaseResponse(403, Message.Plan_limit_reached_403(subscription?.linkLimit?.toString(), subscription.braintreePlanId), null));
             }
         }
+        // premium_month not match can not add tags and expiredate
+        if (subscription?.braintreePlanId !== PlanType.premium_month) {
+            req.body.tags = [];
+            req.body.expiresAt = null;
+        }
+        // standard_month and premium_month not match can not add customCode
+        if (subscription?.braintreePlanId !== PlanType.standard_month &&
+            subscription?.braintreePlanId !== PlanType.premium_month) {
+            req.body.customCode = "";
+        }
         // Custom short codes are a paid feature
-        let shortCode = customCode?.trim();
+        let shortCode = req.body.customCode?.trim();
         if (shortCode && !subscription) {
             return res.status(403).json(BaseResponse(403, Message.ShortCode_403, null));
         }

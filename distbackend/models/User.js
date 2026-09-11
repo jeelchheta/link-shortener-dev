@@ -28,8 +28,8 @@ const userSchema = new Schema({
         required: [true, "Password is required"],
         minlength: 6
     },
-    resetPasswordToken: { type: String, select: false },
-    resetPasswordExpires: { type: Date, select: false },
+    resetPasswordToken: { type: String, select: false, default: null },
+    resetPasswordExpires: { type: Date, select: false, default: null },
     otp: String,
     otpExpire: Date,
     isVerified: { type: Boolean, default: false },

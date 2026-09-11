@@ -127,7 +127,7 @@ export async function updateUserSubscription(userid, obj) {
 export async function forgotpasswordBL(newUser) {
     try {
         const token = generateCode(16), tokenExpire = Moment(new Date()).add(getEnv("TOKEN_EXPIRATION_MIN"), "m");
-        const result = await UserModel.updateOne({ username: newUser.email }, {
+        const result = await UserModel.updateOne({ email: newUser.email }, {
             $set: {
                 resetPasswordToken: token,
                 resetPasswordExpires: tokenExpire
