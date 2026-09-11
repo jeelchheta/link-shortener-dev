@@ -36,9 +36,4 @@ export const DateFormate = {
 export const OTP_EXPIRATION_MIN = Number(process.env.OTP_EXPIRATION_MIN) || 5;
 export const TOKEN_EXPIRATION_MIN = Number(process.env.TOKEN_EXPIRATION_MIN) || 5;
 export const PASSWORD_SALT_ROUNDS = 10;
-export const Template_Dir = {
-    Base: "backend/templates",
-    otp_txt: "/otp.txt",
-    forgotpassword_txt: "/forgotpassword.txt"
-};
 //# sourceMappingURL=constant.js.map

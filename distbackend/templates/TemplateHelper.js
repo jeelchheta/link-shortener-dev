@@ -1,12 +1,9 @@
-import fs from "fs/promises";
 import Moment, {} from "moment";
-import path from "path";
-import { DateFormate, Template_Dir } from "../constant/constant.js";
+import { DateFormate } from "../constant/constant.js";
+import { forgotpassword_txt, otp_txt } from "./TextTemplates.js";
 export async function getOTPTemplate(OTPCode, ExpDate) {
     try {
-        const filePath = path.resolve(`${Template_Dir.Base}${Template_Dir.otp_txt}`);
-        const data = await fs.readFile(filePath, "utf8");
-        let parts = data.split("[Subject:]");
+        let parts = otp_txt.split("[Subject:]");
         let subject = parts[0]?.replaceAll("{OTPCode}", OTPCode);
         let body = parts[1]?.
             replaceAll("{OTPCode}", OTPCode).
@@ -22,9 +19,7 @@ export async function getOTPPasswordResetTemplate(req, token, ExpDate) {
     try {
         const protocol = req.protocol, host = req.get("host");
         const resetLink = `${protocol}://${host}/reset-password/${token}`;
-        const filePath = path.resolve(`${Template_Dir.Base}${Template_Dir.forgotpassword_txt}`);
-        const data = await fs.readFile(filePath, "utf8");
-        let parts = data.split("[Subject:]");
+        let parts = forgotpassword_txt.split("[Subject:]");
         let subject = parts[0];
         let body = parts[1]?.
             replaceAll("{ResetLink}", resetLink).
@@ -36,4 +31,4 @@ export async function getOTPPasswordResetTemplate(req, token, ExpDate) {
         throw err;
     }
 }
-//# sourceMappingURL=Template.js.map
+//# sourceMappingURL=TemplateHelper.js.map

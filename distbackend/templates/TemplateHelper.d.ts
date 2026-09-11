@@ -8,4 +8,4 @@ export declare function getOTPPasswordResetTemplate(req: Request, token: string,
     subject: string | undefined;
     body: string | undefined;
 }>;
-//# sourceMappingURL=Template.d.ts.map
+//# sourceMappingURL=TemplateHelper.d.ts.map

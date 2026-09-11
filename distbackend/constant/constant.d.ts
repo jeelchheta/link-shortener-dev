@@ -35,9 +35,4 @@ export declare const DateFormate: {
 export declare const OTP_EXPIRATION_MIN: number;
 export declare const TOKEN_EXPIRATION_MIN: number;
 export declare const PASSWORD_SALT_ROUNDS = 10;
-export declare const Template_Dir: {
-    Base: string;
-    otp_txt: string;
-    forgotpassword_txt: string;
-};
 //# sourceMappingURL=constant.d.ts.map

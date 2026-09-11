@@ -2,7 +2,7 @@ import Moment from "moment";
 import { forgotpasswordBL, getTokenBaseUser, getUnVerifiedUser, loginUserBL, registerUserBL, updatepasswordBL, validateEmailAndContact, verifyOTPBL } from "../BL/userBL.js";
 import { Message, OTP_EXPIRATION_MIN, TOKEN_EXPIRATION_MIN } from "../constant/constant.js";
 import { BaseResponse } from "../utils/utility.js";
-import { getOTPPasswordResetTemplate, getOTPTemplate } from "../templates/Template.js";
+import { getOTPPasswordResetTemplate, getOTPTemplate } from "../templates/TemplateHelper.js";
 import { sendEmail } from "../BL/mailHelper.js";
 // @ Route: api/register POST
 export async function registerUser(req, res, next) {
