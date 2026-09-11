@@ -129,8 +129,8 @@ export async function forgotpasswordBL(newUser) {
         const token = generateCode(16), tokenExpire = Moment(new Date()).add(getEnv("TOKEN_EXPIRATION_MIN"), "m");
         const result = await UserModel.updateOne({ username: newUser.email }, {
             $set: {
-                token: token,
-                tokenExpire: tokenExpire
+                resetPasswordToken: token,
+                resetPasswordExpires: tokenExpire
             }
         });
         return { token, tokenExpire };
@@ -154,9 +154,9 @@ export async function getTokenBaseUser(user) {
 export async function updatepasswordBL(request) {
     try {
         const hashedPassword = await bcrypt.hash(request.password, PASSWORD_SALT_ROUNDS);
-        const result = await UserModel.updateOne({ token: request.token }, {
+        const result = await UserModel.updateOne({ resetPasswordToken: request.token }, {
             $set: {
-                token: null,
+                resetPasswordToken: null,
                 password: hashedPassword
             }
         });
