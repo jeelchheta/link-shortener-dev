@@ -22,7 +22,8 @@ export const Message = {
     "Link_410": "This link has been disabled or may be removed by its owner",
     "Link_410_1": "This link has expired",
     "User_404": "User not found",
-    "Custom_code_404": "Custom code must be 1-20 characters (letters, numbers, - or _)"
+    "Custom_code_404": "Custom code must be 1-20 characters (letters, numbers, - or _)",
+    "Invalid_expired_token_404": "Invalid or expired token"
 };
 export const DBCollections = {
     users: "users",
@@ -34,6 +35,6 @@ export const DateFormate = {
     MMMMDoYYYYhmmssa: "MMMM Do YYYY, h:mm:ss a"
 };
 export const OTP_EXPIRATION_MIN = Number(process.env.OTP_EXPIRATION_MIN) || 5;
-export const TOKEN_EXPIRATION_MIN = Number(process.env.TOKEN_EXPIRATION_MIN) || 5;
+export const RESET_TOKEN_EXPIRES_MIN = Number(process.env.RESET_TOKEN_EXPIRES_MIN) || 5;
 export const PASSWORD_SALT_ROUNDS = 10;
 //# sourceMappingURL=constant.js.map

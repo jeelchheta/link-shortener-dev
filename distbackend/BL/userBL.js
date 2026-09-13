@@ -70,12 +70,12 @@ export async function verifyOTPBL(newUser) {
 export async function loginUserBL(newUser) {
     try {
         const user = await UserModel.findOne({ email: newUser.email, isVerified: true });
-        const JWT_SECRET = process.env.JWT_SECRET, JWT_TIMEOUT = process.env.JWT_TIMEOUT;
+        const JWT_SECRET = process.env.JWT_SECRET, JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET, JWT_TIMEOUT = process.env.JWT_TIMEOUT, JWT_REFRESH_TIMEOUT = process.env.JWT_REFRESH_TIMEOUT;
         if (!JWT_SECRET) {
             throw new Error("JWT_SECRET is not defined");
         }
-        if (!JWT_TIMEOUT) {
-            throw new Error("JWT_TIMEOUT is not defined");
+        if (!JWT_REFRESH_SECRET) {
+            throw new Error("JWT_REFRESH_SECRET is not defined");
         }
         if (user && bcrypt.compareSync(newUser.password, user.password)) {
             const subscribedPlan = await SubscriptionModel.findOne({
@@ -86,12 +86,16 @@ export async function loginUserBL(newUser) {
                 id: user._id,
                 username: user.email
             }, JWT_SECRET, { expiresIn: JWT_TIMEOUT });
+            const refreshToken = jwt.sign({
+                id: user._id
+            }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_TIMEOUT });
             return {
                 id: user._id.toString(),
                 firstname: user.firstname,
                 lastname: user.lastname,
                 plan: subscribedPlan?.braintreePlanId || PlanTypeEnum.Free,
-                token: token
+                token: token,
+                refreshToken: refreshToken
             };
         }
     }
@@ -126,7 +130,7 @@ export async function updateUserSubscription(userid, obj) {
 }
 export async function forgotpasswordBL(newUser) {
     try {
-        const token = generateCode(16), tokenExpire = Moment(new Date()).add(getEnv("TOKEN_EXPIRATION_MIN"), "m");
+        const token = generateCode(16), tokenExpire = Moment(new Date()).add(getEnv("RESET_TOKEN_EXPIRES_MIN"), "m");
         const result = await UserModel.updateOne({ email: newUser.email }, {
             $set: {
                 resetPasswordToken: token,
@@ -163,6 +167,30 @@ export async function updatepasswordBL(request) {
     }
     catch (err) {
         throw err;
+    }
+}
+export async function refreshTokenBL(refreshToken) {
+    try {
+        const JWT_SECRET = process.env.JWT_SECRET, JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET, JWT_TIMEOUT = process.env.JWT_TIMEOUT, JWT_REFRESH_TIMEOUT = process.env.JWT_REFRESH_TIMEOUT;
+        if (!JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined");
+        }
+        if (!JWT_REFRESH_SECRET) {
+            throw new Error("JWT_REFRESH_SECRET is not defined");
+        }
+        const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+        const user = await UserModel.findOne({ _id: payload.id });
+        if (!user) {
+            throw new Error("User not found");
+        }
+        const token = jwt.sign({
+            id: user._id,
+            username: user.email
+        }, JWT_SECRET, { expiresIn: JWT_TIMEOUT });
+        return token;
+    }
+    catch (error) {
+        throw error;
     }
 }
 //# sourceMappingURL=userBL.js.map

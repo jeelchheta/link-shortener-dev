@@ -12,8 +12,6 @@ export interface IUser extends Document {
     isVerified: boolean;
     createdAt: Date;
     updatedAt: Date;
-    comparePassword(candidate: string): Promise<boolean>;
-    generateResetToken(): string;
 }
 declare const _default: Mongoose.Model<IUser, {}, {}, {}, Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
     _id: Mongoose.Types.ObjectId;

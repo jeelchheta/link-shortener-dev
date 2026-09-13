@@ -65,4 +65,27 @@ export function isValidCustomCode(string) {
         return false;
     }
 }
+export function durationToMs(value) {
+    try {
+        const match = String(value).trim().match(/^(\d+(?:\.\d+)?)(s|m|h|d|w|M|y)$/);
+        if (!match) {
+            throw new Error(`Invalid duration: ${value}`);
+        }
+        const amount = Number(match[1]);
+        const unit = match[2];
+        const units = {
+            "s": 1000,
+            "m": 60 * 1000,
+            "h": 60 * 60 * 1000,
+            "d": 24 * 60 * 60 * 1000,
+            "w": 7 * 24 * 60 * 60 * 1000,
+            "M": 30 * 24 * 60 * 60 * 1000,
+            "y": 365 * 24 * 60 * 60 * 1000,
+        };
+        return units[unit] ? amount * units[unit] : 7 * 24 * 60 * 60 * 1000;
+    }
+    catch (error) {
+        throw (error);
+    }
+}
 //# sourceMappingURL=utility.js.map

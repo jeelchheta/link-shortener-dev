@@ -26,4 +26,5 @@ export declare function updatepasswordBL(request: {
     token: string;
     password: string;
 }): Promise<void>;
+export declare function refreshTokenBL(refreshToken: string): Promise<string>;
 //# sourceMappingURL=userBL.d.ts.map

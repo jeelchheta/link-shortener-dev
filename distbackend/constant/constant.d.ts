@@ -22,6 +22,7 @@ export declare const Message: {
     Link_410_1: string;
     User_404: string;
     Custom_code_404: string;
+    Invalid_expired_token_404: string;
 };
 export declare const DBCollections: {
     users: string;
@@ -33,6 +34,6 @@ export declare const DateFormate: {
     MMMMDoYYYYhmmssa: string;
 };
 export declare const OTP_EXPIRATION_MIN: number;
-export declare const TOKEN_EXPIRATION_MIN: number;
+export declare const RESET_TOKEN_EXPIRES_MIN: number;
 export declare const PASSWORD_SALT_ROUNDS = 10;
 //# sourceMappingURL=constant.d.ts.map

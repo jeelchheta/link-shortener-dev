@@ -1,9 +1,9 @@
 import Moment from "moment";
-import { forgotpasswordBL, getTokenBaseUser, getUnVerifiedUser, loginUserBL, registerUserBL, updatepasswordBL, validateEmailAndContact, verifyOTPBL } from "../BL/userBL.js";
-import { Message, OTP_EXPIRATION_MIN, TOKEN_EXPIRATION_MIN } from "../constant/constant.js";
-import { BaseResponse } from "../utils/utility.js";
-import { getOTPPasswordResetTemplate, getOTPTemplate } from "../templates/TemplateHelper.js";
 import { sendEmail } from "../BL/mailHelper.js";
+import { forgotpasswordBL, getTokenBaseUser, getUnVerifiedUser, loginUserBL, refreshTokenBL, registerUserBL, updatepasswordBL, validateEmailAndContact, verifyOTPBL } from "../BL/userBL.js";
+import { Message, OTP_EXPIRATION_MIN, RESET_TOKEN_EXPIRES_MIN } from "../constant/constant.js";
+import { getOTPPasswordResetTemplate, getOTPTemplate } from "../templates/TemplateHelper.js";
+import { BaseResponse, durationToMs } from "../utils/utility.js";
 // @ Route: api/register POST
 export async function registerUser(req, res, next) {
     try {
@@ -67,11 +67,18 @@ export async function loginUser(req, res, next) {
             return res.status(400).json(BaseResponse(400, Message[400], null));
         }
         // Save the new user
-        let userinfo = await loginUserBL(req.body);
-        if (!userinfo?.token) {
+        let data = await loginUserBL(req.body);
+        if (!data?.token) {
             return res.status(500).json(BaseResponse(500, Message[500], null));
         }
         else {
+            const { refreshToken, ...userinfo } = data;
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: durationToMs(String(process.env.JWT_REFRESH_TIMEOUT))
+            });
             return res.status(200).json(BaseResponse(200, Message[200], userinfo));
         }
     }
@@ -101,6 +108,7 @@ export async function forgotpassword(req, res, next) {
     }
 }
 ;
+// @ Route: api/reset-password/:token POST
 export async function setnewpassword(req, res, next) {
     try {
         const { token } = req.params;
@@ -112,7 +120,7 @@ export async function setnewpassword(req, res, next) {
         if (!user) {
             return res.status(404).json(BaseResponse(404, Message[404], null));
         }
-        else if (Moment(new Date()).diff(user.resetPasswordExpires, "minutes") > TOKEN_EXPIRATION_MIN) {
+        else if (Moment(new Date()).diff(user.resetPasswordExpires, "minutes") > RESET_TOKEN_EXPIRES_MIN) {
             return res.status(400).json(BaseResponse(400, Message[400], null));
         }
         await updatepasswordBL({ token: token?.toString(), password: password });
@@ -123,4 +131,22 @@ export async function setnewpassword(req, res, next) {
     }
 }
 ;
+// @ Route: api/reset-password/:token POST
+export async function refreshToken(req, res, next) {
+    try {
+        const result = req.headers.cookie
+            ?.split("; ")
+            .find(row => row.startsWith("refreshToken="))
+            ?.split("=")[1];
+        const refreshToken = result ? decodeURIComponent(result) : null;
+        if (!refreshToken) {
+            return res.status(401).json(BaseResponse(401, Message.Invalid_expired_token_404, null));
+        }
+        const token = await refreshTokenBL(refreshToken);
+        return res.status(200).json(BaseResponse(200, Message[200], token));
+    }
+    catch (error) {
+        return res.status(401).json(BaseResponse(401, Message.Invalid_expired_token_404, null));
+    }
+}
 //# sourceMappingURL=usercontroller.js.map

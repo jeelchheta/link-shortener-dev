@@ -36,27 +36,28 @@ const userSchema = new Schema({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
-// Hash password before saving
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password"))
-        return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-});
-userSchema.methods.comparePassword = async function (candidate) {
-    return bcrypt.compare(candidate, this.password);
-};
-// Generates a raw token (sent via email) and stores its hashed version + expiry
-userSchema.methods.generateResetToken = function () {
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    this.resetPasswordToken = crypto
-        .createHash("sha256")
-        .update(rawToken)
-        .digest("hex");
-    const expiresMin = Number(process.env.RESET_TOKEN_EXPIRES_MIN || 30);
-    this.resetPasswordExpires = new Date(Date.now() + expiresMin * 60 * 1000);
-    return rawToken;
-};
+// // Hash password before saving
+// userSchema.pre("save", async function (next) {
+//     if (!this.isModified("password")) return next();
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+//     next();
+// });
+// userSchema.methods.comparePassword = async function (
+//     candidate: string
+// ): Promise<boolean> {
+//     return bcrypt.compare(candidate, this.password);
+// };
+// // Generates a raw token (sent via email) and stores its hashed version + expiry
+// userSchema.methods.generateResetToken = function (): string {
+//     const rawToken = crypto.randomBytes(32).toString("hex");
+//     this.resetPasswordToken = crypto
+//         .createHash("sha256")
+//         .update(rawToken)
+//         .digest("hex");
+//     const expiresMin = Number(process.env.RESET_TOKEN_EXPIRES_MIN || 30);
+//     this.resetPasswordExpires = new Date(Date.now() + expiresMin * 60 * 1000);
+//     return rawToken;
+// };
 export default Mongoose.model(DBCollections.users, userSchema);
 //# sourceMappingURL=User.js.map

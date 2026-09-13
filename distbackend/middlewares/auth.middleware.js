@@ -22,7 +22,7 @@ async function protect(req, res, next) {
             next();
         }
         catch (err) {
-            return res.status(401).json(BaseResponse(401, Message[401], null));
+            return res.status(401).json(BaseResponse(401, Message.Invalid_expired_token_404, null));
         }
     }
     catch (err) {
