@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx tsx watch backend/index.ts",
-    "build": "tsc",
+    "build": "node distbackend/index.js",
     "start": "node distbackend/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
