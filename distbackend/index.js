@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import express, {} from "express";
-import errorMiddleware from "./middlewares/error.middleware.js";
-import router from "./routes/index.js";
-import { redirectToOriginal } from './controllers/linkController.js';
 import path from 'path';
 import { fileURLToPath } from "url";
+import { connectRedis } from './config/redis.js';
+import { redirectToOriginal } from './controllers/linkController.js';
+import errorMiddleware from "./middlewares/error.middleware.js";
+import router from "./routes/index.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 // __dirname replacement for ES Modules
@@ -33,8 +34,9 @@ app.get("/{*splat}", (req, res, next) => {
 });
 // ---------------- ERROR HANDLER ----------------
 app.use(errorMiddleware);
-// app.listen(PORT, () => {
-//     console.log(`Server is running at http://localhost:${PORT}`);
-// });
+await connectRedis();
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+});
 export default app;
 //# sourceMappingURL=index.js.map

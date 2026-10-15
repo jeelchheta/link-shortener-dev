@@ -1,5 +1,6 @@
 import { createLinkBL, deleteLinkBL, getLinkAnalyticsBL, getMyLinksBL, getStatsBL } from "../BL/linkBL.js";
 import { braintree_Plan_linkLimit, braintree_Plans, PlanType } from "../config/braintree.js";
+import { redisClient } from "../config/redis.js";
 import { Message } from "../constant/constant.js";
 import LinkModel, {} from "../models/Link.js";
 import SubscriptionModel from "../models/Subscription.js";
@@ -141,6 +142,20 @@ export async function getLinkAnalytics(req, res, next) {
 export async function redirectToOriginal(req, res, next) {
     try {
         const { code } = req.params;
+        const cacheKey = `shortlink:${code}`;
+        // 1. check redis
+        const cached = await redisClient.get(cacheKey);
+        if (cached) {
+            const link = JSON.parse(cached);
+            // redis cache also contain expired time
+            if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
+                await redisClient.del(cacheKey);
+                return res.status(410).send(Link_Expired_410);
+            }
+            // Increment analytics separately
+            // await redisClient.incr(`clicks:${code}`);
+            return res.redirect(link.originalUrl);
+        }
         const link = await LinkModel.findOne({
             shortCode: code
         });
@@ -153,13 +168,20 @@ export async function redirectToOriginal(req, res, next) {
         if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
             return res.status(410).send(Link_Expired_410);
         }
+        // 3. Store only required redirect information in Redis
+        await redisClient.set(cacheKey, JSON.stringify({
+            originalUrl: link.originalUrl,
+            expiresAt: link.expiresAt,
+        }), {
+            EX: 300, // 5 minutes
+        });
         link.clicks += 1;
         link.clickHistory.push({ date: new Date() });
         // Keep click history bounded so documents don't grow unbounded forever
         if (link.clickHistory.length > 2000) {
             link.clickHistory = link.clickHistory.slice(-2000);
         }
-        await link.save();
+        link.save();
         return res.redirect(link.originalUrl);
     }
     catch (err) {

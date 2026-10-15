@@ -6,6 +6,7 @@ export declare function registerUserBL(newUser: Pick_IUserData): Promise<any>;
 export declare function getUnVerifiedUser(newUser: Pick_IUserEmail): Promise<IUser | null>;
 export declare function verifyOTPBL(newUser: Pick_IUserEmail): Promise<void>;
 export declare function loginUserBL(newUser: Pick<IUser, "email" | "password">): Promise<any>;
+export declare function loginWith2Dot0TokenBL(token20: string): Promise<any>;
 export declare function getUserById(userid: string | undefined): Promise<any>;
 export declare function updateUserSubscription(userid: string, obj: {
     plan: string;

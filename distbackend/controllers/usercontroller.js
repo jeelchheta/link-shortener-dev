@@ -1,9 +1,9 @@
 import Moment from "moment";
 import { sendEmail } from "../BL/mailHelper.js";
-import { forgotpasswordBL, getTokenBaseUser, getUnVerifiedUser, loginUserBL, refreshTokenBL, registerUserBL, updatepasswordBL, validateEmailAndContact, verifyOTPBL } from "../BL/userBL.js";
+import { forgotpasswordBL, getTokenBaseUser, getUnVerifiedUser, loginUserBL, loginWith2Dot0TokenBL, refreshTokenBL, registerUserBL, updatepasswordBL, validateEmailAndContact, verifyOTPBL } from "../BL/userBL.js";
 import { Message, OTP_EXPIRATION_MIN, RESET_TOKEN_EXPIRES_MIN } from "../constant/constant.js";
 import { getOTPPasswordResetTemplate, getOTPTemplate } from "../templates/TemplateHelper.js";
-import { BaseResponse, durationToMs } from "../utils/utility.js";
+import { BaseResponse, durationToMs, getEnv } from "../utils/utility.js";
 // @ Route: api/register POST
 export async function registerUser(req, res, next) {
     try {
@@ -149,4 +149,45 @@ export async function refreshToken(req, res, next) {
         return res.status(401).json(BaseResponse(401, Message.Invalid_expired_token_404, null));
     }
 }
+// @ Route: api/getauth2dot0token GET
+export async function getAuth2Dot0Token(req, res, next) {
+    try {
+        const ClientId = getEnv("GOOGLE_APP_CLIENTID");
+        if (!ClientId) {
+            return res.status(404).json(BaseResponse(404, Message[404], null));
+        }
+        return res.status(200).json(BaseResponse(200, Message[200], ClientId));
+    }
+    catch (error) {
+        next(error);
+    }
+}
+// @ Route: api/login POST
+export async function loginWith2Dot0Token(req, res, next) {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json(BaseResponse(400, Message[400], null));
+        }
+        // Save the new user
+        let data = await loginWith2Dot0TokenBL(token);
+        if (!data?.token) {
+            return res.status(500).json(BaseResponse(500, Message[500], null));
+        }
+        else {
+            const { refreshToken, ...userinfo } = data;
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: durationToMs(String(process.env.JWT_REFRESH_TIMEOUT))
+            });
+            return res.status(200).json(BaseResponse(200, Message[200], userinfo));
+        }
+    }
+    catch (err) {
+        next(err);
+    }
+}
+;
 //# sourceMappingURL=usercontroller.js.map

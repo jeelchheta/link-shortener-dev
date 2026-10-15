@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import Moment from "moment";
-import { OTP_EXPIRATION_MIN, PASSWORD_SALT_ROUNDS } from "../constant/constant.js";
+import { Message, OTP_EXPIRATION_MIN, PASSWORD_SALT_ROUNDS } from "../constant/constant.js";
 import SubscriptionModel from "../models/Subscription.js";
 import UserModel from "../models/User.js";
 import { PlanTypeEnum, SubscriptionStatus } from "../types/index.js";
@@ -103,6 +104,53 @@ export async function loginUserBL(newUser) {
         throw err;
     }
     return null;
+}
+export async function loginWith2Dot0TokenBL(token20) {
+    try {
+        const client = new OAuth2Client();
+        const Secret = getEnv("GOOGLE_APP_CLIENTID");
+        const ticket = await client.verifyIdToken({
+            idToken: token20,
+            audience: Secret
+        });
+        const payload = ticket.getPayload();
+        if (!payload) {
+            throw new Error(Message[500]);
+        }
+        const user = await UserModel.findOne({ email: payload.email, isVerified: true });
+        if (!user) {
+            throw new Error(Message[404]);
+        }
+        const JWT_SECRET = process.env.JWT_SECRET, JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET, JWT_TIMEOUT = process.env.JWT_TIMEOUT, JWT_REFRESH_TIMEOUT = process.env.JWT_REFRESH_TIMEOUT;
+        if (!JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined");
+        }
+        if (!JWT_REFRESH_SECRET) {
+            throw new Error("JWT_REFRESH_SECRET is not defined");
+        }
+        const subscribedPlan = await SubscriptionModel.findOne({
+            userid: user._id,
+            status: SubscriptionStatus.Active
+        });
+        const token = jwt.sign({
+            id: user._id,
+            username: user.email
+        }, JWT_SECRET, { expiresIn: JWT_TIMEOUT });
+        const refreshToken = jwt.sign({
+            id: user._id
+        }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_TIMEOUT });
+        return {
+            id: user._id.toString(),
+            firstname: user.firstname,
+            lastname: user.lastname,
+            plan: subscribedPlan?.braintreePlanId || PlanTypeEnum.Free,
+            token: token,
+            refreshToken: refreshToken
+        };
+    }
+    catch (err) {
+        throw err;
+    }
 }
 export async function getUserById(userid) {
     try {

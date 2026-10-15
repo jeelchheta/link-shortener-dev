@@ -1,7 +1,7 @@
 import express, {} from "express";
 import { createLink, deleteLink, getLinkAnalytics, getMyLinks, getStats, updateLink } from "../controllers/linkController.js";
 import { braintreeWebhook, cancelmyplan, checkout, getclienttoken, getmyplan, getmytransactions, getplans } from "../controllers/subscriptionController.js";
-import { forgotpassword, loginUser, refreshToken, registerUser, setnewpassword, verifyOTP } from "../controllers/usercontroller.js";
+import { forgotpassword, getAuth2Dot0Token, loginUser, loginWith2Dot0Token, refreshToken, registerUser, setnewpassword, verifyOTP } from "../controllers/usercontroller.js";
 import protect from "../middlewares/auth.middleware.js";
 import { limiter } from "../middlewares/ratelimiter.middleware.js";
 const router = express.Router();
@@ -11,6 +11,8 @@ router.post("/login", limiter(100, 15), loginUser);
 router.post('/forgot-password', limiter(5, 15), forgotpassword);
 router.post('/reset-password/:token', setnewpassword);
 router.post('/refresh-token', refreshToken);
+router.get("/getauth2dot0token", getAuth2Dot0Token);
+router.post("/loginwith2dot0token", loginWith2Dot0Token);
 router.post("/links", protect, createLink);
 router.get("/links", protect, getMyLinks);
 router.get("/links/stats", protect, getStats);

@@ -1,5 +1,7 @@
 import "dotenv";
 import Mongoose from "mongoose";
+import dns from "node:dns";
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
     throw new Error('❌ MONGODB_URI is completely missing from your .env file!');
@@ -12,11 +14,11 @@ Mongoose.connection.on("reconnected", () => {
     console.log("Mongo has reconnected");
 });
 Mongoose.connection.on("error", (error) => {
-    console.log("Mongo connection has an error", error);
+    console.log("❌ Mongo connection has an error", error);
     Mongoose.disconnect();
 });
 Mongoose.connection.on("disconnected", () => {
-    console.log("Mongo connection is disconnected");
+    console.log("❌ Mongo connection is disconnected");
 });
 export default Mongoose;
 //# sourceMappingURL=db.js.map
